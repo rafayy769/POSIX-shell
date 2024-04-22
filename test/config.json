@@ -1,0 +1,44 @@
+{
+    "test_directory": "Tests",
+    "default_tests": [
+        "easy",
+        "medium",
+        "advanced"
+    ],
+    "test_files": {
+        "easy": [
+            "simple.test",
+            "builtins.test",
+            "aliases.test",
+            "builtins_one.hidden",
+            "builtins_two.hidden",
+            "exec_only.hidden"
+        ],
+        "medium": [
+            "pipeline.test",
+            "ioredir.test",
+            "ioredir_one.hidden",
+            "ioredir_two.hidden",
+            "pipeline_one.hidden",
+            "pipeline_ioredir.hidden"
+        ],
+        "advanced": [
+            "chaining.test",
+            "wildcards.test",
+            "quotes.test",
+            "wild_chaining.test",
+            "wildcards_one.hidden",
+            "chaining.hidden"
+        ]
+    },
+    "weightage": {
+        "easy": 30,
+        "medium": 40,
+        "advanced": 30
+    },
+    "shell": "../build/Shell",
+    "reference_shell": "dash",
+    "default_timeout": 3,
+    "log_to_file": false,
+    "verbose": true
+}

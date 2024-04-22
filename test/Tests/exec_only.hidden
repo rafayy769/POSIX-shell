@@ -1,0 +1,63 @@
+ls
+touch tempfile_1.txt
+touch tempfile_2.txt
+touch tempfile_3.txt
+touch tempfile_4.txt
+touch tempfile_5.txt
+touch tempfile_6.txt
+touch tempfile_7.txt
+touch tempfile_8.txt
+touch tempfile_9.txt
+touch tempfile_10.txt
+cat tempfile_1.txt tempfile_2.txt tempfile_3.txt tempfile_4.txt tempfile_5.txt tempfile_6.txt tempfile_7.txt tempfile_8.txt tempfile_9.txt tempfile_10.txt
+mkdir tempdir_1
+mkdir tempdir_2
+mkdir tempdir_3
+mkdir tempdir_4
+mkdir tempdir_5
+touch tempdir_1/tempfile_1.txt
+touch tempdir_1/tempfile_2.txt
+touch tempdir_1/tempfile_3.txt
+touch tempdir_1/tempfile_4.txt
+touch tempdir_1/tempfile_5.txt
+touch tempdir_1/tempfile_6.txt
+touch tempdir_1/tempfile_7.txt
+touch tempdir_1/tempfile_8.txt
+touch tempdir_1/tempfile_9.txt
+touch tempdir_1/tempfile_10.txt
+touch tempdir_2/tempfile_1.txt
+touch tempdir_2/tempfile_2.txt
+touch tempdir_2/tempfile_3.txt
+touch tempdir_2/tempfile_4.txt
+touch tempdir_2/tempfile_5.txt
+touch tempdir_2/tempfile_6.txt
+touch tempdir_2/tempfile_7.txt
+touch tempdir_2/tempfile_8.txt
+touch tempdir_2/tempfile_9.txt
+touch tempdir_2/tempfile_10.txt
+ls -a
+ls -al
+ls tempdir_1/
+ls tempdir_2/
+ls tempdir_1/ tempdir_2/
+rm -rf tempdir_1/
+rm -rf tempdir_2/
+ls -a
+rm -rf tempdir_3/
+rm -rf tempdir_4/
+rm -rf tempdir_5/
+rm -f tempfile_1.txt
+rm -f tempfile_2.txt
+rm -f tempfile_3.txt
+rm -f tempfile_4.txt
+rm -f tempfile_5.txt
+rm -f tempfile_6.txt
+rm -f tempfile_7.txt
+rm -f tempfile_8.txt
+rm -f tempfile_9.txt
+rm -f tempfile_10.txt
+cat --help
+cat test.py config.json
+cat -E config.json
+tac config.json
+head -qn 5 config.json test.py

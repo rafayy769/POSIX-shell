@@ -1,0 +1,13 @@
+cat config.json | sed -n '3,6p'
+cat -v config.json | sort
+ls -t | head -n 3
+ls -t | head -n 3 | sort
+cat config.json | head -n 10 | tail -n 9 | head -n 8 | tail -n 7 | head -n 6 | tail -n 5 | head -n 4 | tail -n 3 | head -n 2 | tail -n 1
+cat config.json | head -n 20 | tail -n 19 | head -n 18 | tail -n 17 | head -n 16 | tail -n 15 | head -n 14 | tail -n 13 | head -n 12 | tail -n 11 | head -n 10 | tail -n 9 | head -n 8 | tail -n 7 | head -n 6 | tail -n 5 | head -n 4 | tail -n 3 | head -n 2 | tail -n 1
+date | cut 1,2,3
+cut --version | tail -n 1 | grep "David" | tr [a-z] [A-Z]
+cat names.txt | tr [:lower:] [:upper:]
+cat names.txt | tr [:lower:] [:upper:] | cat -E
+echo "Welcome to {CS 370}" | tr "{}" "()"
+echo "My password is {12345678}" | tr "{}" "()" | tr -d [:digit:] | tr [:lower:] [:upper:]
+find . -type d | grep Tests

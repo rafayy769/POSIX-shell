@@ -1,0 +1,12 @@
+pwd
+cd Tests
+pwd
+cd ..
+pwd
+alias cwd="pwd"
+cwd
+cd Tests
+cwd
+unalias cwd
+pwd
+echo "cwd was aliased and unaliased"

@@ -1,0 +1,23 @@
+pwd > pwd.txt
+cat < pwd.txt
+rm -f pwd.txt
+cd Tests
+pwd > pwd.txt
+cat < pwd.txt
+rm -f pwd.txt
+cd ..
+pwd > pwd.txt
+cat < pwd.txt
+alias cwd="pwd"
+cwd >> pwd.txt
+cat < pwd.txt
+rm -f pwd.txt
+cd Tests
+cwd > pwd.txt
+cat < pwd.txt
+unalias cwd
+pwd > pwd.txt
+cat < pwd.txt
+echo "cwd was aliased and unaliased" >> pwd.txt
+cat < pwd.txt
+rm -f pwd.txt

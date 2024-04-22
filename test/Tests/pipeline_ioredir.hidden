@@ -1,0 +1,5 @@
+date | cat > date.txt
+cat < date.txt | grep "Oct" | awk '{print $2}' > month.txt
+cat < month.txt | tr [:upper:] [:lower:] >> month.txt
+cat < month.txt | grep -c "t"
+rm -f date.txt month.txt

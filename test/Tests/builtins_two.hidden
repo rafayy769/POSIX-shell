@@ -1,0 +1,16 @@
+alias e "echo"
+alias l "ls"
+alias p "pwd"
+alias c "cd"
+p
+c Tests
+p
+c ..
+p
+c Tests
+p
+e "aliased ls but never used cuz builtins are being tested, lets unalias everything now"
+unalias e
+unalias l
+unalias p
+unalias c

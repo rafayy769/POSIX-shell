@@ -1,0 +1,1 @@
+echo "ls" > command.txt && echo "exit" >> command.txt && ../build/Shell < command.txt ; rm command.txt

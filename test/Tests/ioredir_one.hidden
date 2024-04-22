@@ -1,0 +1,18 @@
+echo "Start" >> logs.txt
+echo "of" >> logs.txt
+echo "the" >> logs.txt
+echo "test" >> logs.txt
+head -qn 5 config.json test.py > tempfile_1.txt
+tail -qn 5 config.json test.py > tempfile_2.txt
+cat tempfile_1.txt tempfile_2.txt > tempfile_3.txt
+echo "Test Line 8" > tempfile_4.txt
+cat < tempfile_4.txt
+cat < logs.txt
+cat < tempfile_3.txt
+cat < tempfile_2.txt
+cat < tempfile_1.txt
+find . -type d > dirs.txt
+grep -v "Tests" dirs.txt > dirs2.txt
+cat < dirs2.txt
+rm -f dirs.txt dirs2.txt
+rm -f logs.txt tempfile_1.txt tempfile_2.txt tempfile_3.txt tempfile_4.txt
