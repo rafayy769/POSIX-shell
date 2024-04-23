@@ -5,3 +5,4 @@ find .. -type f -name "*.c" -o -name "*.h" > find.log && cat find.log | xargs wc
 find .. -type f -name "*.c" -o -name "*.h"
 alias findCfiles="echo ../src/*.c"
 echo "*.c" | grep c
+rm -f find.log

@@ -24,7 +24,7 @@ UPPERCASE_CMD = tr '[:lower:][\-/]' '[:upper:][__]'
 CFLAGS=-Wall -Wextra -Werror
 VALG_FLAGS = --leak-check=full --track-origins=yes
 DEBUG_FLAGS = -g -DDEBUG
-RELEASE_FLAGS = -O3 -march=native
+RELEASE_FLAGS = -O2 -march=native
 LINKER_FLAGS = -lreadline -lncurses
 
 # Color codes for print statements
@@ -140,11 +140,3 @@ ARGS:=
 # Runs the test suite
 test: $(TARGET)
 	$(Q) cd $(TEST_DIR) && python3 test.py $(ARGS)
-
-# Cleans everything. Removes all directories. MAKE SURE YOU KNOW WHAT YOU'RE DOING, OTHERWISE YOU'LL LOSE ALL YOUR WORK.
-# distclean:
-# 	@echo "$(CYAN)Removing all directories.$(RESET)"
-# 	@$(RM) $(BUILD_DIR)
-# 	@$(RM) $(SRC_DIR)
-# 	@$(RM) $(INCLUDE_DIR)
-# 	@echo "$(GREEN)Successfully removed all directories. Restored the project to initial state.$(RESET)"

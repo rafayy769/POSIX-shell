@@ -157,6 +157,8 @@ void deleteHashtable(struct hashtable *table)
     }
     free(table->buckets);
     free(table);
+
+    table = NULL;
 }
 
 // prints the hashtable
@@ -171,7 +173,7 @@ void printHashtable(struct hashtable *table)
         while (curr != NULL)
         {
             if (curr->value)
-                LOG_PRINT("%s=\'%s\'\n", curr->key, curr->value);
+                printf("%s=\'%s\'\n", curr->key, curr->value);
             curr = curr->next;
         }
     }

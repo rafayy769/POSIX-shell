@@ -268,7 +268,6 @@ int executeCommand(Command* command)
         {
             return status;
         }
-
         // if the command succeeded, simply close the file descriptors
         if (simpleCommand->inputFD != STDIN_FD)
             close(simpleCommand->inputFD);
@@ -396,16 +395,16 @@ void printSimpleCommand(SimpleCommand* simpleCommand)
     if (!simpleCommand)
         return;
 
-    LOG_PRINT("-- name: %s\n", simpleCommand->commandName);
-    LOG_PRINT("-- args:\n");
+    LOG_DEBUG("-- name: %s\n", simpleCommand->commandName);
+    LOG_DEBUG("-- args:\n");
     for (int i = 0; i < simpleCommand->argc; i++)
     {
-        LOG_PRINT("-- -- %s \n", simpleCommand->args[i]);
+        LOG_DEBUG("-- -- %s \n", simpleCommand->args[i]);
     }
 
-    LOG_PRINT("-- Input FD: %d\n", simpleCommand->inputFD);
-    LOG_PRINT("-- Output FD: %d\n", simpleCommand->outputFD);
-    LOG_PRINT("--------------------\n");
+    LOG_DEBUG("-- Input FD: %d\n", simpleCommand->inputFD);
+    LOG_DEBUG("-- Output FD: %d\n", simpleCommand->outputFD);
+    LOG_DEBUG("--------------------\n");
 }
 
 /*----------------------------------------------------------------------------------------*/

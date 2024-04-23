@@ -18,15 +18,19 @@
 #include <stdlib.h>
 
 // Exposed macros for logging
-#define LOG_ERROR(...) LOG(LOG_ERR, "[ERROR]", LOG_COLOR_ERR, __VA_ARGS__)
-#define LOG_DEBUG(...) LOG(LOG_DBG, "[DEBUG]", LOG_COLOR_DBG, __VA_ARGS__)
-#define LOG_PRINT(...) LOG(LOG_PRI, "[PRINT]", LOG_COLOR_PRI, __VA_ARGS__)
+#define LOG_ERROR(...) LOG(LOG_ERR, "[ERROR]", LOG_COLOR_ERR, LOG_STDERR, __VA_ARGS__)
+#define LOG_DEBUG(...) LOG(LOG_DBG, "[DEBUG]", LOG_COLOR_DBG, LOG_STDERR, __VA_ARGS__)
+#define LOG_PRINT(...) LOG(LOG_PRI, "[PRINT]", LOG_COLOR_PRI, LOG_OUT, __VA_ARGS__)
 
 // we specify that the strings in our program won't exceed length of 100 characters
 #define MAX_STRING_LENGTH 1024
 
 // in order to be consistent, let's just define a macro for copying strings
 #define COPY(str) (str ? strndup(str, MAX_STRING_LENGTH) : NULL)
+
+// useful macros for string handling
+#define CAT(X,Y) X##Y
+#define STR(X) #X
 
 // Useful macros for file descriptors to make the code more readable
 #define STDIN_FD 0

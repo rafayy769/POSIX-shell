@@ -42,7 +42,7 @@
 #endif
 
 // Macros to change the behavior of annotations
-#define ANNOTATIONS_INFO 1  /* Change this to zero to disable annotations info */
+#define ANNOTATIONS_INFO 0  /* Change this to zero to disable annotations info */
 
 // what annotations do you want to print? format is (file, function, line) set any of these to 0 to not print them
 #define ANNOTATIONS_FILE 0
@@ -51,30 +51,31 @@
 
 // output function for printing, default is printf
 #define LOG_OUT(...) printf(__VA_ARGS__)
+#define LOG_STDERR(...) fprintf(stderr, __VA_ARGS__)
 
 // defines the annotation string.
 // if you want to change the format of the annotation, change the above macros and this string. the annotation string is simply "file,function,line" depending on the above macros
-#define ANNOTATION_INFO_STRING do {\
+#define ANNOTATION_INFO_STRING(logger) do {\
     if (ANNOTATIONS_INFO) {\
-        LOG_OUT(" ("); \
-        if (ANNOTATIONS_FILE) printf("%s", __FILE__); \
-        if (ANNOTATIONS_FILE) printf(","); \
-        if (ANNOTATIONS_FUNC) printf("%s", __func__); \
-        if (ANNOTATIONS_FUNC) printf(","); \
-        if (ANNOTATIONS_LINE) printf("%d", __LINE__); \
-        LOG_OUT(") ");\
+        logger(" ("); \
+        if (ANNOTATIONS_FILE) logger("%s", __FILE__); \
+        if (ANNOTATIONS_FILE) logger(","); \
+        if (ANNOTATIONS_FUNC) logger("%s", __func__); \
+        if (ANNOTATIONS_FUNC) logger(","); \
+        if (ANNOTATIONS_LINE) logger("%d", __LINE__); \
+        logger(") ");\
     }\
 } while (0)
 
 // macro to log a message.
-#define LOG(type, prefix, color, ...) \
+#define LOG(type, prefix, color, logger, ...) \
     do { \
         if (DEBUG) {\
             if (ANNOTATIONS) \
-                LOG_OUT("%s%s%s: ", color, prefix, LOG_RESET); \
-            ANNOTATION_INFO_STRING; \
+                logger("%s%s%s: ", color, prefix, LOG_RESET); \
+            ANNOTATION_INFO_STRING(logger); \
             if (type == LOG_DBG) { \
-                LOG_OUT(__VA_ARGS__); \
+                logger(__VA_ARGS__); \
                 break; \
             } \
         }\

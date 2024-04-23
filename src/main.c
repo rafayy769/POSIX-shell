@@ -4,24 +4,20 @@
  * @brief This is the main file for the shell. It contains the main function and the loop that runs the shell.
  * @version 0.1
  * @date 2023-06-02
- * 
+ *
  * @copyright Copyright (c) 2023
- * 
+ *
  */
 
 #include "utils.h"
 #include "command.h"
 #include "parser.h"
 #include "hashtable.h"
+#include "shell_builtins.h"
 
 #include <errno.h>
 #include <readline/readline.h>
 #include <readline/history.h>
-
-// This macro is defined when the shell runs a process, so if this shell is run inside another instance of the same shell, the macro gets defined. It is used to avoid any sort of conflicts. 
-#ifdef CHILD_PROCESS
-#undef CHILD_PROCESS
-#endif
 
 // Number of buckets used by the alias hashtable.
 #define NUMBER_OF_BUCKETS 101
@@ -30,40 +26,33 @@
  * 1. Interactive: The default usage. An interactive command line.
  * 2. Non_interactive: When the input is not via a terminal but by any other mean.
  * 3. Script: Runs a list of commands specified in a file.
-*/
+ */
 #define INTERACTIVE_MODE 1
 #define NON_INTERACTIVE_MODE 2
 #define SCRIPT_MODE 3
 
-#define SHELL_STATES_LIST \
-    X(INTERACTIVE),       \
-    X(NON_INTERACTIVE),   \
-    X(SCRIPT)             \
-
-#define CAT(X,Y) X##Y
-#define STR(X) #X
-
 // Global variables
 int lastExitStatus = 0;
-hashtable* aliases = NULL;
+hashtable *aliases = NULL;
 
-FILE* script = NULL;
+FILE *script = NULL;
+// array to store individual lines of input from the script
+char **inputCommands = NULL;
+
 int mode = 0;
 
-int originalStdoutFD;
-int originalStdinFD;
-int dup_originalIn;
-int dup_originalOut;
+int originalStdoutFD = STDOUT_FD;
+int originalStdinFD = STDIN_FD;
 
 // Useful functions
-char* getInput(void);
+char *getInput(void);
 
 /**
  * @brief This is the main function for the shell. It contains the main loop that runs the shell.
- * 
- * @return int 
+ *
+ * @return int
  */
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
     if (argc > 2)
     {
@@ -80,6 +69,37 @@ int main(int argc, char** argv)
         {
             LOG_ERROR("Error opening script %s: %s\n", argv[1], strerror(errno));
             exit(1);
+        }
+
+        inputCommands = malloc(sizeof(char *) * MAX_STRING_LENGTH);
+        if (!inputCommands)
+        {
+            LOG_ERROR("Error allocating memory for inputCommands: %s\n", strerror(errno));
+            exit(1);
+        }
+
+        int i = 0;
+        while (1)
+        {
+            inputCommands[i] = malloc(sizeof(char) * MAX_STRING_LENGTH);
+            if (!inputCommands[i])
+            {
+                LOG_ERROR("Error allocating memory for inputCommands[%d]: %s\n", i, strerror(errno));
+                exit(1);
+            }
+
+            if (fgets(inputCommands[i], MAX_STRING_LENGTH, script) == NULL)
+            {
+                free(inputCommands[i]);
+                inputCommands[i] = NULL;
+                break;
+            }
+
+            // Remove trailing newline
+            if (inputCommands[i][strlen(inputCommands[i]) - 1] == '\n')
+                inputCommands[i][strlen(inputCommands[i]) - 1] = '\0';
+
+            i++;
         }
     }
     else
@@ -108,41 +128,37 @@ int main(int argc, char** argv)
         exit(1);
     }
 
-    // save the original file descriptors
-    originalStdinFD = STDIN_FD;
-    originalStdoutFD = STDOUT_FD;
-
     LOG_DEBUG("Starting shell\n");
     LOG_DEBUG("Shell's state:\n");
     if (mode == INTERACTIVE_MODE)
         LOG_DEBUG("-- Running in INTERACTIVE mode.\n");
     else if (mode == SCRIPT_MODE)
-        {LOG_DEBUG("-- Running in SCRIPT mode.\n");LOG_DEBUG("-- -- Script: %s\n", argv[1]);}
+    {
+        LOG_DEBUG("-- Running in SCRIPT mode.\n");
+        LOG_DEBUG("-- -- Script: %s\n", argv[1]);
+    }
     else if (mode == NON_INTERACTIVE_MODE)
         LOG_DEBUG("-- Running in NON_INTERACTIVE_MODE mode.\n");
 
-    LOG_PRINT("Original STDIN: %d\n", originalStdinFD);
-    LOG_PRINT("Original STDOUT: %d\n", originalStdoutFD);
-
+    // assuming all tokens are separated by atleast one space
     char delimiter = ' ';
 
-    while (1) 
+    while (1)
     {
         // read input
-        char* input = getInput();
-
+        char *input = getInput();
         // Check for EOF.
         if (!input)
             break;
-        if (strcmp(input, "") == 0) 
+        if (strcmp(input, "") == 0)
         {
             free(input);
             continue;
         }
         if (strcmp(input, "exit") == 0)
         {
+            printf("Exiting shell\n");
             free(input);
-            deleteHashtable(aliases);
             break;
         }
 
@@ -151,18 +167,19 @@ int main(int argc, char** argv)
             add_history(input);
 
         // simple whitespace tokenizer
-        char** tokens = tokenizeString(input, delimiter);
+        char **tokens = tokenizeString(input, delimiter);
 
-        for (int i = 0; tokens[i] != NULL; i++) {
+        for (int i = 0; tokens[i] != NULL; i++)
+        {
             LOG_DEBUG("Token %d: [%s]\n", i, tokens[i]);
         }
 
         // generate the command from tokens
-        CommandChain* commandChain = parseTokens(tokens);
+        CommandChain *commandChain = parseTokens(tokens);
 
         // display the command chain
         printCommandChain(commandChain);
-        
+
         // execute the command
         int status = executeCommandChain(commandChain);
         LOG_DEBUG("Command executed with status %d\n", status);
@@ -176,58 +193,62 @@ int main(int argc, char** argv)
         // Free buffer that was allocated by readline
         free(input);
     }
+
+    if (mode == SCRIPT_MODE)
+    {
+        free(inputCommands);
+        if (script)
+            fclose(script);
+    }
+
+    deleteHashtable(aliases);
     return 0;
 }
 
-char* getInput()
+char *getInput()
 {
-    char* input = NULL;
+    static int currentCommand = 0;
+    static char prompt_buffer[MAX_STRING_LENGTH];
+
+    char *input = NULL;
+    char *cwd_res = getcwd(prompt_buffer, MAX_STRING_LENGTH);
 
     switch (mode)
     {
-        case INTERACTIVE_MODE:
-            char prompt_buffer[MAX_STRING_LENGTH];
-            char* cwd_res = getcwd(prompt_buffer, MAX_STRING_LENGTH);
-            if (!cwd_res)
-            {
-                LOG_ERROR("Error getting current working directory: %s\n", strerror(errno));
-                exit(1);
-            }
-
-            input = readline(strcat(prompt_buffer, " $ "));
-            break;
-        case NON_INTERACTIVE_MODE:
-            input = malloc(sizeof(char) * MAX_STRING_LENGTH);
-            if (!input)
-            {
-                LOG_ERROR("Error allocating memory for input: %s\n", strerror(errno));
-                exit(1);
-            }
-            if (fgets(input, MAX_STRING_LENGTH, stdin) == NULL)
-            {
-                free(input);
-                return NULL;
-            }
-            // Remove trailing newline
-            if (input[strlen(input) - 1] == '\n')
-                input[strlen(input) - 1] = '\0';
-            break;
-        case SCRIPT_MODE:
-            size_t len = 0;
-            ssize_t read;
-            read = getline(&input, &len, script);
-            if (read == -1)
-            {
-                free(input);
-                return NULL;
-            }
-            // Remove trailing newline
-            if (input[read - 1] == '\n')
-                input[read - 1] = '\0';
-            break;
-        default:
-            LOG_ERROR("Invalid mode %d\n", mode);
+    case INTERACTIVE_MODE:
+        if (!cwd_res)
+        {
+            LOG_ERROR("Error getting current working directory: %s\n", strerror(errno));
             exit(1);
+        }
+
+        input = readline(strcat(prompt_buffer, " $ "));
+        break;
+    case NON_INTERACTIVE_MODE:
+        input = malloc(sizeof(char) * MAX_STRING_LENGTH);
+        if (!input)
+        {
+            LOG_ERROR("Error allocating memory for input: %s\n", strerror(errno));
+            exit(1);
+        }
+        if (fgets(input, MAX_STRING_LENGTH, stdin) == NULL)
+        {
+            free(input);
+            return NULL;
+        }
+        // Remove trailing newline
+        if (input[strlen(input) - 1] == '\n')
+            input[strlen(input) - 1] = '\0';
+        break;
+    case SCRIPT_MODE:
+        if (inputCommands[currentCommand] == NULL)
+            return NULL;
+        input = inputCommands[currentCommand];
+        currentCommand++;
+        break;
+    default:
+        LOG_ERROR("Invalid mode %d\n", mode);
+        exit(1);
     }
 
     return input;
